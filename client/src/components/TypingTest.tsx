@@ -21,6 +21,7 @@ const TypingTest = () => {
   const [testComplete, setTestComplete] = useState(false);
   const [currentKey, setCurrentKey] = useState('');
   const [typedChars, setTypedChars] = useState<string[]>([]);
+  const [isShiftPressed, setIsShiftPressed] = useState(false);
   const timerIntervalRef = useRef<number | null>(null);
 
   // Initial keyboard layout
@@ -34,30 +35,7 @@ const TypingTest = () => {
   const currentText = typingTexts[currentTextIndex].split('');
   const progress = (currentPosition / currentText.length) * 100;
 
-  // Methods
-  const startTest = () => {
-    setIsTestActive(true);
-    setCurrentPosition(0);
-    setKeystrokes(0);
-    setCorrectKeystrokes(0);
-    setAccuracy(100);
-    setWpm(0);
-    setStartTime(null);
-    setTestComplete(false);
-    setElapsedTime(0);
-    setTypedChars([]);
-    
-    // Reset keyboard to normal layout
-    setKeyboardLayout({
-      row1: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-      row2: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-      row3: ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
-    });
-    
-    // Focus the window to capture keystrokes
-    window.focus();
-  };
-
+  // Reset the test state
   const resetTest = () => {
     setIsTestActive(false);
     setCurrentPosition(0);
@@ -84,6 +62,15 @@ const TypingTest = () => {
     }
   };
 
+  // Start a new test
+  const startTest = () => {
+    setIsTestActive(true);
+    resetTest();
+    // Focus the window to capture keystrokes
+    window.focus();
+  };
+
+  // Start the timer for the test
   const startTimer = useCallback(() => {
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
@@ -111,6 +98,7 @@ const TypingTest = () => {
     }, 1000);
   }, [correctKeystrokes, isTestActive, startTime, testComplete]);
 
+  // Complete the test
   const completeTest = () => {
     setIsTestActive(false);
     setTestComplete(true);
@@ -122,23 +110,23 @@ const TypingTest = () => {
     }
   };
 
-  // 找出鍵盤佈局中指定字母的位置
+  // Find the position of a key in the keyboard layout
   const findKeyPosition = useCallback((layout: KeyboardLayout, char: string): { row: number, index: number } | null => {
     char = char.toUpperCase();
     
-    // 檢查第一排
+    // Check row 1
     const row1Index = layout.row1.indexOf(char);
     if (row1Index !== -1) {
       return { row: 1, index: row1Index };
     }
     
-    // 檢查第二排
+    // Check row 2
     const row2Index = layout.row2.indexOf(char);
     if (row2Index !== -1) {
       return { row: 2, index: row2Index };
     }
     
-    // 檢查第三排
+    // Check row 3
     const row3Index = layout.row3.indexOf(char);
     if (row3Index !== -1) {
       return { row: 3, index: row3Index };
@@ -147,38 +135,45 @@ const TypingTest = () => {
     return null;
   }, []);
   
-  // 將實體鍵盤按鍵映射到虛擬鍵盤上的字母
+  // Map physical keyboard key to virtual keyboard letter
   const mapPhysicalKeyToVirtual = useCallback((physicalKey: string, layout: KeyboardLayout): string => {
-    // 針對字母按鍵進行映射
-    physicalKey = physicalKey.toUpperCase();
+    // Convert to uppercase for position finding
+    const upperPhysicalKey = physicalKey.toUpperCase();
     
-    // 標準 QWERTY 鍵盤布局
+    // Standard QWERTY keyboard layout
     const qwertyLayout = {
       row1: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
       row2: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
       row3: ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
     };
     
-    // 找出物理按鍵在標準鍵盤中的位置
-    const physicalKeyPosition = findKeyPosition(qwertyLayout, physicalKey);
+    // Find position of physical key on standard keyboard
+    const physicalKeyPosition = findKeyPosition(qwertyLayout, upperPhysicalKey);
     
-    // 如果找不到或不是字母按鍵，直接返回原始按鍵
-    if (!physicalKeyPosition || !/^[A-Z]$/i.test(physicalKey)) {
+    // If key not found or not a letter key, return original key
+    if (!physicalKeyPosition || !/^[A-Z]$/i.test(upperPhysicalKey)) {
       return physicalKey;
     }
     
-    // 根據物理按鍵位置找出虛擬鍵盤上的字母
+    // Get the letter at the same position in the scrambled layout
+    let virtualKey = '';
     if (physicalKeyPosition.row === 1) {
-      return layout.row1[physicalKeyPosition.index] || physicalKey;
+      virtualKey = layout.row1[physicalKeyPosition.index] || upperPhysicalKey;
     } else if (physicalKeyPosition.row === 2) {
-      return layout.row2[physicalKeyPosition.index] || physicalKey;
+      virtualKey = layout.row2[physicalKeyPosition.index] || upperPhysicalKey;
     } else if (physicalKeyPosition.row === 3) {
-      return layout.row3[physicalKeyPosition.index] || physicalKey;
+      virtualKey = layout.row3[physicalKeyPosition.index] || upperPhysicalKey;
     }
     
-    return physicalKey;
-  }, [findKeyPosition]);
+    // Apply case based on shift state
+    if (isShiftPressed) {
+      return virtualKey.toUpperCase();
+    } else {
+      return virtualKey.toLowerCase();
+    }
+  }, [findKeyPosition, isShiftPressed]);
 
+  // Process key press events
   const handleKeyPress = useCallback((event: KeyboardEvent) => {
     if (!isTestActive) return;
     
@@ -189,9 +184,9 @@ const TypingTest = () => {
     const physicalKey = event.key;
     
     // Check if this is an A-Z key (for scrambling purposes)
-    const isAlphaKey = /^[a-zA-Z]$/.test(physicalKey);
+    const isAlphaKey = /^[a-zA-Z]$/i.test(physicalKey);
     
-    // Map physical keyboard key to virtual keyboard letter (only for letter keys)
+    // Map physical keyboard key to virtual keyboard letter
     const mappedKey = mapPhysicalKeyToVirtual(physicalKey, keyboardLayout);
     
     // Key used for input comparison
@@ -217,18 +212,18 @@ const TypingTest = () => {
     // Check if input is correct
     const isCorrect = pressedChar === expectedChar;
     
+    // If correct, increment correct keystroke count
     if (isCorrect) {
-      // If correct, increment correct keystroke count
       setCorrectKeystrokes(prev => prev + 1);
-      
-      // Move to next character
-      setCurrentPosition(prev => prev + 1);
-      
-      // Check if typing is complete
-      if (currentPosition + 1 >= currentText.length) {
-        completeTest();
-        return;
-      }
+    }
+    
+    // Always move to next character regardless of correctness
+    setCurrentPosition(prev => prev + 1);
+    
+    // Check if typing is complete
+    if (currentPosition + 1 >= currentText.length) {
+      completeTest();
+      return;
     }
     
     // Update accuracy
@@ -261,18 +256,52 @@ const TypingTest = () => {
     typedChars,
     mapPhysicalKeyToVirtual
   ]);
-
+  
+  // Handle key down events
+  const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    // Track shift key state
+    if (event.key === 'Shift') {
+      setIsShiftPressed(true);
+      return; // Don't process Shift key as input
+    }
+    
+    // Also update shift state from the shiftKey property
+    if (event.shiftKey) {
+      setIsShiftPressed(true);
+    }
+    
+    // Process regular keypress
+    if (isTestActive) {
+      handleKeyPress(event);
+    }
+  }, [handleKeyPress, isTestActive]);
+  
+  // Handle key up events
+  const handleKeyUp = useCallback((event: KeyboardEvent) => {
+    // Track shift key state
+    if (event.key === 'Shift') {
+      setIsShiftPressed(false);
+    }
+    
+    // Check shift key state
+    if (!event.shiftKey) {
+      setIsShiftPressed(false);
+    }
+  }, []);
+  
   // Set up and clean up event listeners
   useEffect(() => {
-    document.addEventListener('keydown', handleKeyPress);
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
     
     return () => {
-      document.removeEventListener('keydown', handleKeyPress);
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
       }
     };
-  }, [handleKeyPress]);
+  }, [handleKeyDown, handleKeyUp]);
 
   return (
     <div className="min-h-screen flex flex-col items-center py-8 px-4">
