@@ -30,40 +30,16 @@ const TypingTest = () => {
     row2: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
     row3: ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
   });
+  
+  // Flag to track if keyboard has been scrambled yet
+  const [keyboardScrambled, setKeyboardScrambled] = useState<boolean>(false);
 
   // Current text and progress calculations
   const currentText = typingTexts[currentTextIndex].split('');
   const progress = (currentPosition / currentText.length) * 100;
 
-  // Reset the test state
+  // Reset and initialize the test
   const resetTest = () => {
-    setIsTestActive(false);
-    setCurrentPosition(0);
-    setKeystrokes(0);
-    setCorrectKeystrokes(0);
-    setAccuracy(100);
-    setWpm(0);
-    setStartTime(null);
-    setTestComplete(false);
-    setElapsedTime(0);
-    setTypedChars([]);
-    
-    // Reset keyboard to normal layout
-    setKeyboardLayout({
-      row1: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-      row2: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-      row3: ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
-    });
-    
-    // Stop timer
-    if (timerIntervalRef.current) {
-      clearInterval(timerIntervalRef.current);
-      timerIntervalRef.current = null;
-    }
-  };
-
-  // Start a new test
-  const startTest = () => {
     // Reset everything first
     setCurrentPosition(0);
     setKeystrokes(0);
@@ -74,6 +50,8 @@ const TypingTest = () => {
     setTestComplete(false);
     setElapsedTime(0);
     setTypedChars([]);
+    setPreviousLayouts([]);
+    setCorrectedChars([]);
     
     // Reset keyboard to normal layout
     setKeyboardLayout({
@@ -88,12 +66,26 @@ const TypingTest = () => {
       timerIntervalRef.current = null;
     }
     
-    // Now activate the test
-    setIsTestActive(true);
+    // Reset test status but leave it inactive until first keystroke
+    setIsTestActive(false);
+    setKeyboardScrambled(false);
     
     // Focus the window to capture keystrokes
     window.focus();
   };
+  
+  // Start the test manually
+  const startTest = () => {
+    resetTest();
+    setIsTestActive(true);
+  };
+  
+  // Auto-start test when keypress is detected
+  const autoStartTest = useCallback(() => {
+    if (!isTestActive) {
+      setIsTestActive(true);
+    }
+  }, [isTestActive]);
 
   // Start the timer for the test
   const startTimer = useCallback(() => {
@@ -295,7 +287,16 @@ const TypingTest = () => {
 
   // Handle key down events
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    // Don't process if test isn't active
+    // Auto-start test when a regular key is pressed
+    if (!isTestActive && !testComplete) {
+      const isRegularKey = /^[a-zA-Z0-9]$/i.test(event.key);
+      if (isRegularKey) {
+        // Start test with a clean state
+        setIsTestActive(true);
+      }
+    }
+    
+    // Don't process further if test isn't active
     if (!isTestActive) return;
     
     // Track shift key state
@@ -344,7 +345,7 @@ const TypingTest = () => {
     
     // Process regular keypress
     handleKeyPress(event);
-  }, [handleKeyPress, isTestActive, currentPosition, currentText, typedChars, previousLayouts]);
+  }, [handleKeyPress, isTestActive, testComplete, currentPosition, currentText, typedChars, previousLayouts]);
   
   // Handle key up events
   const handleKeyUp = useCallback((event: KeyboardEvent) => {
