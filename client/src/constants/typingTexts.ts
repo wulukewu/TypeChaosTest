@@ -1,0 +1,5 @@
+export const typingTexts = [
+  "The quick brown fox jumps over the lazy dog. Typing with a constantly scrambling keyboard is a unique challenge that tests not only your typing speed but also your ability to adapt quickly to changes. Can you maintain your composure as the keys switch positions after every keystroke? This test will measure your typing speed, accuracy, and adaptability under chaotic conditions.",
+  "Programming is the process of creating a set of instructions that tell a computer how to perform a task. Programming can be done using a variety of computer programming languages, such as JavaScript, Python, and C++. As a typing test, this paragraph will challenge you with common programming terms while the keyboard layout changes beneath your fingers.",
+  "Artificial intelligence is transforming how we live, work, and communicate. Machine learning algorithms can now recognize patterns, translate languages, and even create art. As you type this text about cutting-edge technology, you'll need to adapt quickly to the changing keyboard layout. How well can you maintain your typing rhythm when everything is constantly shifting?"
+];
