@@ -271,36 +271,8 @@ const TypingTest = () => {
       setPreviousLayouts(prev => [...prev, {...keyboardLayout}]);
       
       // Scramble the keyboard
-      setKeyboardLayout(scrambleKeyboard(keyboardLayout));
-      
-      // Calculate the next key that needs to be pressed and highlight it
-      const nextExpectedChar = currentText[currentPosition + 1];
-      if (nextExpectedChar) {
-        // Find which physical key corresponds to the virtual key
-        const qwertyLayout = {
-          row1: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-          row2: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-          row3: ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
-        };
-        
-        // Find the position in the scrambled layout
-        const posInScrambled = findKeyPosition(keyboardLayout, nextExpectedChar.toUpperCase());
-        if (posInScrambled) {
-          // Now find what key is in that position on a standard QWERTY keyboard
-          let physicalKey = '';
-          if (posInScrambled.row === 1) {
-            physicalKey = qwertyLayout.row1[posInScrambled.index];
-          } else if (posInScrambled.row === 2) {
-            physicalKey = qwertyLayout.row2[posInScrambled.index];
-          } else if (posInScrambled.row === 3) {
-            physicalKey = qwertyLayout.row3[posInScrambled.index];
-          }
-          
-          if (physicalKey) {
-            setCurrentKey(physicalKey);
-          }
-        }
-      }
+      const newLayout = scrambleKeyboard(keyboardLayout);
+      setKeyboardLayout(newLayout);
     }
   }, [
     correctKeystrokes, 
@@ -317,6 +289,62 @@ const TypingTest = () => {
     findKeyPosition
   ]);
   
+  // Function to update keyboard highlight showing the next key to press
+  const updateNextKeyHighlight = useCallback(() => {
+    // Get the next expected character
+    const nextExpectedChar = currentText[currentPosition];
+    if (!nextExpectedChar) return;
+    
+    // Find the key in the scrambled layout that shows this character
+    // We need to find which physical key would type this virtual character
+    const qwertyLayout = {
+      row1: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+      row2: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+      row3: ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
+    };
+    
+    // For each key in the scrambled layout
+    let foundPhysicalKey = '';
+    
+    // Check row 1
+    for (let i = 0; i < keyboardLayout.row1.length; i++) {
+      if (keyboardLayout.row1[i].toUpperCase() === nextExpectedChar.toUpperCase()) {
+        foundPhysicalKey = qwertyLayout.row1[i];
+        break;
+      }
+    }
+    
+    // Check row 2
+    if (!foundPhysicalKey) {
+      for (let i = 0; i < keyboardLayout.row2.length; i++) {
+        if (keyboardLayout.row2[i].toUpperCase() === nextExpectedChar.toUpperCase()) {
+          foundPhysicalKey = qwertyLayout.row2[i];
+          break;
+        }
+      }
+    }
+    
+    // Check row 3
+    if (!foundPhysicalKey) {
+      for (let i = 0; i < keyboardLayout.row3.length; i++) {
+        if (keyboardLayout.row3[i].toUpperCase() === nextExpectedChar.toUpperCase()) {
+          foundPhysicalKey = qwertyLayout.row3[i];
+          break;
+        }
+      }
+    }
+    
+    // If we found the key, highlight it
+    if (foundPhysicalKey) {
+      setCurrentKey(foundPhysicalKey);
+    }
+  }, [currentPosition, currentText, keyboardLayout]);
+  
+  // Run the highlight update when the component first mounts or when cursor position changes
+  useEffect(() => {
+    updateNextKeyHighlight();
+  }, [updateNextKeyHighlight, currentPosition, keyboardLayout]);
+  
   // Store previous keyboard layouts to enable backspace
   const [previousLayouts, setPreviousLayouts] = useState<KeyboardLayout[]>([]);
   const [correctedChars, setCorrectedChars] = useState<boolean[]>([]);
@@ -329,6 +357,12 @@ const TypingTest = () => {
       if (isRegularKey) {
         // Start test with a clean state
         setIsTestActive(true);
+        
+        // Start timer immediately when test starts
+        if (startTime === null) {
+          setStartTime(new Date());
+          startTimer();
+        }
       }
     }
     
