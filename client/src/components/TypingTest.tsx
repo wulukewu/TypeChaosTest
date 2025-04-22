@@ -203,8 +203,13 @@ const TypingTest = () => {
     // Get the physical key pressed
     const physicalKey = event.key;
 
-    // Check if this is an A-Z key (for scrambling purposes)
-    const isAlphaKey = /^[a-zA-Z]$/i.test(physicalKey);
+    // Check if this is a typing character (a-z, punctuation)
+    const isTypingChar = /^[a-zA-Z,.\s]$/i.test(physicalKey);
+
+    // Don't process control keys
+    if (!isTypingChar) {
+      return;
+    }
 
     // Map physical keyboard key to virtual keyboard letter
     const mappedKey = mapPhysicalKeyToVirtual(physicalKey, keyboardLayout);
