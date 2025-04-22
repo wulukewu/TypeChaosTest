@@ -518,7 +518,7 @@ const TypingTest = () => {
           <Keyboard 
             keyboardLayout={keyboardLayout}
             currentKey={currentKey}
-            virtualKey={currentText[currentPosition]?.toUpperCase() || ''}
+            virtualKey={mapPhysicalKeyToVirtual(currentKey.toLowerCase(), keyboardLayout) || ''}
           />
         ) : (
           <ResultsCard
