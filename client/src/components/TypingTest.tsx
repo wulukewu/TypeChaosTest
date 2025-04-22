@@ -265,8 +265,8 @@ const TypingTest = () => {
       }
     }
 
-    // Only scramble keyboard layout after A-Z keys are pressed
-    if (isAlphaKey) {
+    // Only scramble keyboard layout after typing characters are pressed
+    if (isTypingChar) {
       // Set flag to indicate keyboard has been scrambled at least once
       if (!keyboardScrambled) {
         setKeyboardScrambled(true);
