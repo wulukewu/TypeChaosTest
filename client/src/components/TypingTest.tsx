@@ -472,10 +472,10 @@ const TypingTest = () => {
                 className={
                   index === currentPosition
                     ? 'character-current'
+                    : index < currentPosition && typedChars[index] === char && correctedChars[index]
+                    ? 'character-corrected'
                     : index < currentPosition && typedChars[index] === char
                     ? 'character-correct'
-                    : index < currentPosition && typedChars[index] !== char && correctedChars[index]
-                    ? 'character-corrected'
                     : index < currentPosition && typedChars[index] !== char
                     ? 'character-incorrect'
                     : ''
