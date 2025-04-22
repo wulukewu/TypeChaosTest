@@ -64,8 +64,33 @@ const TypingTest = () => {
 
   // Start a new test
   const startTest = () => {
+    // Reset everything first
+    setCurrentPosition(0);
+    setKeystrokes(0);
+    setCorrectKeystrokes(0);
+    setAccuracy(100);
+    setWpm(0);
+    setStartTime(null);
+    setTestComplete(false);
+    setElapsedTime(0);
+    setTypedChars([]);
+    
+    // Reset keyboard to normal layout
+    setKeyboardLayout({
+      row1: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+      row2: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+      row3: ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
+    });
+    
+    // Stop any existing timer
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+    
+    // Now activate the test
     setIsTestActive(true);
-    resetTest();
+    
     // Focus the window to capture keystrokes
     window.focus();
   };
@@ -361,9 +386,9 @@ const TypingTest = () => {
             Start Test
           </button>
           <button 
-            className={`px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-md shadow transition ${!isTestActive && !testComplete ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-md shadow transition ${(!isTestActive && !testComplete && keystrokes === 0) ? 'opacity-50 cursor-not-allowed' : ''}`}
             onClick={resetTest}
-            disabled={!isTestActive && !testComplete}
+            disabled={!isTestActive && !testComplete && keystrokes === 0}
           >
             Reset
           </button>
