@@ -57,3 +57,48 @@
   }
 }
 
+@layer components {
+  /* Typing Test Component Styles */
+  .character-current {
+    @apply bg-primary/20 text-primary font-bold border-b-2 border-primary animate-pulse;
+  }
+  
+  .character-correct {
+    @apply text-emerald-600 font-medium;
+  }
+  
+  .character-incorrect {
+    @apply text-red-600 font-medium line-through;
+  }
+  
+  /* Keyboard Animation */
+  @keyframes scramble {
+    0% {
+      transform: scale(0.95);
+    }
+    50% {
+      transform: scale(1.02);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  
+  .animate-scramble {
+    animation: scramble 0.3s ease-in-out;
+  }
+  
+  /* Theme colors for keyboard */
+  .bg-neutral {
+    @apply bg-gray-100 text-gray-800;
+  }
+  
+  .bg-correct {
+    @apply bg-emerald-600;
+  }
+  
+  .bg-wrong {
+    @apply bg-red-600;
+  }
+}
+
