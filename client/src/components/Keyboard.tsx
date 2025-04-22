@@ -35,6 +35,9 @@ const Keyboard: FC<KeyboardProps> = ({ keyboardLayout, currentKey }) => {
     <div className="keyboard-container w-full max-w-3xl bg-white rounded-lg shadow-lg p-6 mb-4 transition-all duration-300">
       <div className="mb-4 text-center">
         <p className="text-sm text-gray-500">Press the key in the same position on your physical keyboard</p>
+        {currentKey && (
+          <p className="mt-1 text-md font-medium text-primary">Next, press the <strong>{currentKey}</strong> key on your keyboard</p>
+        )}
       </div>
       
       {/* Row 1 (numbers) */}
@@ -112,7 +115,7 @@ const Keyboard: FC<KeyboardProps> = ({ keyboardLayout, currentKey }) => {
         </div>
         <div className="flex items-center">
           <div className="w-4 h-4 bg-primary rounded mr-1"></div>
-          <span>Current key</span>
+          <span>Next key to press</span>
         </div>
       </div>
     </div>

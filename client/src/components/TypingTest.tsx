@@ -262,11 +262,45 @@ const TypingTest = () => {
     
     // Only scramble keyboard layout after A-Z keys are pressed
     if (isAlphaKey) {
+      // Set flag to indicate keyboard has been scrambled at least once
+      if (!keyboardScrambled) {
+        setKeyboardScrambled(true);
+      }
+      
       // Store current layout before scrambling
       setPreviousLayouts(prev => [...prev, {...keyboardLayout}]);
       
       // Scramble the keyboard
       setKeyboardLayout(scrambleKeyboard(keyboardLayout));
+      
+      // Calculate the next key that needs to be pressed and highlight it
+      const nextExpectedChar = currentText[currentPosition + 1];
+      if (nextExpectedChar) {
+        // Find which physical key corresponds to the virtual key
+        const qwertyLayout = {
+          row1: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
+          row2: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
+          row3: ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
+        };
+        
+        // Find the position in the scrambled layout
+        const posInScrambled = findKeyPosition(keyboardLayout, nextExpectedChar.toUpperCase());
+        if (posInScrambled) {
+          // Now find what key is in that position on a standard QWERTY keyboard
+          let physicalKey = '';
+          if (posInScrambled.row === 1) {
+            physicalKey = qwertyLayout.row1[posInScrambled.index];
+          } else if (posInScrambled.row === 2) {
+            physicalKey = qwertyLayout.row2[posInScrambled.index];
+          } else if (posInScrambled.row === 3) {
+            physicalKey = qwertyLayout.row3[posInScrambled.index];
+          }
+          
+          if (physicalKey) {
+            setCurrentKey(physicalKey);
+          }
+        }
+      }
     }
   }, [
     correctKeystrokes, 
@@ -278,7 +312,9 @@ const TypingTest = () => {
     startTime, 
     startTimer, 
     typedChars,
-    mapPhysicalKeyToVirtual
+    mapPhysicalKeyToVirtual,
+    keyboardScrambled,
+    findKeyPosition
   ]);
   
   // Store previous keyboard layouts to enable backspace
