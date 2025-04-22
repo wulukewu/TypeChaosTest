@@ -30,7 +30,7 @@ const TypingTest = () => {
     row2: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
     row3: ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
   });
-  
+
   // Flag to track if keyboard has been scrambled yet
   const [keyboardScrambled, setKeyboardScrambled] = useState<boolean>(false);
 
@@ -52,34 +52,34 @@ const TypingTest = () => {
     setTypedChars([]);
     setPreviousLayouts([]);
     setCorrectedChars([]);
-    
+
     // Reset keyboard to normal layout
     setKeyboardLayout({
       row1: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
       row2: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
       row3: ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
     });
-    
+
     // Stop any existing timer
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
       timerIntervalRef.current = null;
     }
-    
+
     // Reset test status but leave it inactive until first keystroke
     setIsTestActive(false);
     setKeyboardScrambled(false);
-    
+
     // Focus the window to capture keystrokes
     window.focus();
   };
-  
+
   // Start the test manually
   const startTest = () => {
     resetTest();
     setIsTestActive(true);
   };
-  
+
   // Auto-start test when keypress is detected
   const autoStartTest = useCallback(() => {
     if (!isTestActive) {
@@ -92,11 +92,11 @@ const TypingTest = () => {
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
     }
-    
+
     // Define a reference point for time calculation
     const timeStarted = new Date();
     setStartTime(timeStarted);
-    
+
     timerIntervalRef.current = window.setInterval(() => {
       if (!isTestActive || testComplete) {
         if (timerIntervalRef.current) {
@@ -105,11 +105,11 @@ const TypingTest = () => {
         }
         return;
       }
-      
+
       // Update elapsed time directly from the reference point
       const newElapsedTime = new Date().getTime() - timeStarted.getTime();
       setElapsedTime(newElapsedTime);
-      
+
       // Update WPM (5 characters = 1 word)
       const elapsedMinutes = newElapsedTime / 60000;
       if (elapsedMinutes > 0) {
@@ -122,7 +122,7 @@ const TypingTest = () => {
   const completeTest = () => {
     setIsTestActive(false);
     setTestComplete(true);
-    
+
     // Stop timer
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
@@ -133,48 +133,48 @@ const TypingTest = () => {
   // Find the position of a key in the keyboard layout
   const findKeyPosition = useCallback((layout: KeyboardLayout, char: string): { row: number, index: number } | null => {
     char = char.toUpperCase();
-    
+
     // Check row 1
     const row1Index = layout.row1.indexOf(char);
     if (row1Index !== -1) {
       return { row: 1, index: row1Index };
     }
-    
+
     // Check row 2
     const row2Index = layout.row2.indexOf(char);
     if (row2Index !== -1) {
       return { row: 2, index: row2Index };
     }
-    
+
     // Check row 3
     const row3Index = layout.row3.indexOf(char);
     if (row3Index !== -1) {
       return { row: 3, index: row3Index };
     }
-    
+
     return null;
   }, []);
-  
+
   // Map physical keyboard key to virtual keyboard letter
   const mapPhysicalKeyToVirtual = useCallback((physicalKey: string, layout: KeyboardLayout): string => {
     // Convert to uppercase for position finding
     const upperPhysicalKey = physicalKey.toUpperCase();
-    
+
     // Standard QWERTY keyboard layout
     const qwertyLayout = {
       row1: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
       row2: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
       row3: ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
     };
-    
+
     // Find position of physical key on standard keyboard
     const physicalKeyPosition = findKeyPosition(qwertyLayout, upperPhysicalKey);
-    
+
     // If key not found or not a letter key, return original key
     if (!physicalKeyPosition || !/^[A-Z]$/i.test(upperPhysicalKey)) {
       return physicalKey;
     }
-    
+
     // Get the letter at the same position in the scrambled layout
     let virtualKey = '';
     if (physicalKeyPosition.row === 1) {
@@ -184,7 +184,7 @@ const TypingTest = () => {
     } else if (physicalKeyPosition.row === 3) {
       virtualKey = layout.row3[physicalKeyPosition.index] || upperPhysicalKey;
     }
-    
+
     // Apply case based on shift state
     if (isShiftPressed) {
       return virtualKey.toUpperCase();
@@ -196,61 +196,61 @@ const TypingTest = () => {
   // Process key press events
   const handleKeyPress = useCallback((event: KeyboardEvent) => {
     if (!isTestActive) return;
-    
+
     // Get the expected character
     const expectedChar = currentText[currentPosition];
-    
+
     // Get the physical key pressed
     const physicalKey = event.key;
-    
+
     // Check if this is an A-Z key (for scrambling purposes)
     const isAlphaKey = /^[a-zA-Z]$/i.test(physicalKey);
-    
+
     // Map physical keyboard key to virtual keyboard letter
     const mappedKey = mapPhysicalKeyToVirtual(physicalKey, keyboardLayout);
-    
+
     // Key used for input comparison
     const pressedChar = mappedKey;
-    
+
     // Store current key for keyboard highlighting (show physical key)
     setCurrentKey(physicalKey.toUpperCase());
-    
+
     // Start timer on first keystroke
     if (currentPosition === 0 && startTime === null) {
       setStartTime(new Date());
       startTimer();
     }
-    
+
     // Store typed character
     const newTypedChars = [...typedChars];
     newTypedChars[currentPosition] = pressedChar;
     setTypedChars(newTypedChars);
-    
+
     // Count keystroke
     setKeystrokes(prev => prev + 1);
-    
+
     // Check if input is correct
     const isCorrect = pressedChar === expectedChar;
-    
+
     // If correct, increment correct keystroke count
     if (isCorrect) {
       setCorrectKeystrokes(prev => prev + 1);
     }
-    
+
     // Always move to next character regardless of correctness
     setCurrentPosition(prev => prev + 1);
-    
+
     // Check if typing is complete
     if (currentPosition + 1 >= currentText.length) {
       completeTest();
       return;
     }
-    
+
     // Update accuracy
     const newKeystrokes = keystrokes + 1;
     const newAccuracy = Math.floor((correctKeystrokes + (isCorrect ? 1 : 0)) / newKeystrokes * 100);
     setAccuracy(newAccuracy);
-    
+
     // Update WPM (5 characters = 1 word)
     if (startTime) {
       const elapsedMinutes = (new Date().getTime() - startTime.getTime()) / 60000;
@@ -259,17 +259,17 @@ const TypingTest = () => {
         setWpm(Math.floor((newCorrectKeystrokes / 5) / elapsedMinutes));
       }
     }
-    
+
     // Only scramble keyboard layout after A-Z keys are pressed
     if (isAlphaKey) {
       // Set flag to indicate keyboard has been scrambled at least once
       if (!keyboardScrambled) {
         setKeyboardScrambled(true);
       }
-      
+
       // Store current layout before scrambling
       setPreviousLayouts(prev => [...prev, {...keyboardLayout}]);
-      
+
       // Scramble the keyboard
       const newLayout = scrambleKeyboard(keyboardLayout);
       setKeyboardLayout(newLayout);
@@ -288,13 +288,13 @@ const TypingTest = () => {
     keyboardScrambled,
     findKeyPosition
   ]);
-  
+
   // Function to update keyboard highlight showing the next key to press
   const updateNextKeyHighlight = useCallback(() => {
     // Get the next expected character
     const nextExpectedChar = currentText[currentPosition];
     if (!nextExpectedChar) return;
-    
+
     // Find the key in the scrambled layout that shows this character
     // We need to find which physical key would type this virtual character
     const qwertyLayout = {
@@ -302,49 +302,39 @@ const TypingTest = () => {
       row2: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
       row3: ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
     };
-    
-    // For each key in the scrambled layout
+
+    // Find the virtual key we need to type
+    const nextExpectedCharUpper = nextExpectedChar.toUpperCase();
+
+    // Find which physical key will type this character in current layout
     let foundPhysicalKey = '';
-    
-    // Check row 1
-    for (let i = 0; i < keyboardLayout.row1.length; i++) {
-      if (keyboardLayout.row1[i].toUpperCase() === nextExpectedChar.toUpperCase()) {
-        foundPhysicalKey = qwertyLayout.row1[i];
-        break;
+    const findKey = (row: string[], qwertyRow: string[]) => {
+      const index = row.findIndex(key => key.toUpperCase() === nextExpectedCharUpper);
+      if (index !== -1) {
+        foundPhysicalKey = qwertyRow[index];
+        return true;
+      }
+      return false;
+    };
+
+    // Search through each row
+    if (!findKey(keyboardLayout.row1, qwertyLayout.row1)) {
+      if (!findKey(keyboardLayout.row2, qwertyLayout.row2)) {
+        findKey(keyboardLayout.row3, qwertyLayout.row3);
       }
     }
-    
-    // Check row 2
-    if (!foundPhysicalKey) {
-      for (let i = 0; i < keyboardLayout.row2.length; i++) {
-        if (keyboardLayout.row2[i].toUpperCase() === nextExpectedChar.toUpperCase()) {
-          foundPhysicalKey = qwertyLayout.row2[i];
-          break;
-        }
-      }
-    }
-    
-    // Check row 3
-    if (!foundPhysicalKey) {
-      for (let i = 0; i < keyboardLayout.row3.length; i++) {
-        if (keyboardLayout.row3[i].toUpperCase() === nextExpectedChar.toUpperCase()) {
-          foundPhysicalKey = qwertyLayout.row3[i];
-          break;
-        }
-      }
-    }
-    
+
     // If we found the key, highlight it
     if (foundPhysicalKey) {
       setCurrentKey(foundPhysicalKey);
     }
   }, [currentPosition, currentText, keyboardLayout]);
-  
+
   // Run the highlight update when the component first mounts or when cursor position changes
   useEffect(() => {
     updateNextKeyHighlight();
   }, [updateNextKeyHighlight, currentPosition, keyboardLayout]);
-  
+
   // Store previous keyboard layouts to enable backspace
   const [previousLayouts, setPreviousLayouts] = useState<KeyboardLayout[]>([]);
   const [correctedChars, setCorrectedChars] = useState<boolean[]>([]);
@@ -357,7 +347,7 @@ const TypingTest = () => {
       if (isRegularKey) {
         // Start test with a clean state
         setIsTestActive(true);
-        
+
         // Start timer immediately when test starts
         if (startTime === null) {
           setStartTime(new Date());
@@ -365,39 +355,39 @@ const TypingTest = () => {
         }
       }
     }
-    
+
     // Don't process further if test isn't active
     if (!isTestActive) return;
-    
+
     // Track shift key state
     if (event.key === 'Shift') {
       setIsShiftPressed(true);
       return; // Don't process Shift key as input
     }
-    
+
     // Also update shift state from the shiftKey property
     if (event.shiftKey) {
       setIsShiftPressed(true);
     }
-    
+
     // Handle backspace
     if (event.key === 'Backspace') {
       // Only allow backspace if we're not at the beginning
       if (currentPosition > 0) {
         // Move cursor back
         setCurrentPosition(prev => prev - 1);
-        
+
         // Mark this position as corrected if it was initially wrong and is now being fixed
         const expectedChar = currentText[currentPosition - 1];
         const typedChar = typedChars[currentPosition - 1];
         const wasWrong = typedChar !== expectedChar;
-        
+
         if (wasWrong) {
           const newCorrected = [...correctedChars];
           newCorrected[currentPosition - 1] = true;
           setCorrectedChars(newCorrected);
         }
-        
+
         // Restore previous keyboard layout if available
         if (previousLayouts.length > 0) {
           const prevLayouts = [...previousLayouts];
@@ -408,33 +398,33 @@ const TypingTest = () => {
           }
         }
       }
-      
+
       // Don't process further
       return;
     }
-    
+
     // Process regular keypress
     handleKeyPress(event);
   }, [handleKeyPress, isTestActive, testComplete, currentPosition, currentText, typedChars, previousLayouts]);
-  
+
   // Handle key up events
   const handleKeyUp = useCallback((event: KeyboardEvent) => {
     // Track shift key state
     if (event.key === 'Shift') {
       setIsShiftPressed(false);
     }
-    
+
     // Check shift key state
     if (!event.shiftKey) {
       setIsShiftPressed(false);
     }
   }, []);
-  
+
   // Set up and clean up event listeners
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
-    
+
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('keyup', handleKeyUp);
