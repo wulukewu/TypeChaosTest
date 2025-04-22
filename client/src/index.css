@@ -71,6 +71,10 @@
     @apply text-red-600 font-medium line-through;
   }
   
+  .character-corrected {
+    @apply text-amber-500 font-medium;
+  }
+  
   /* Keyboard Animation */
   @keyframes scramble {
     0% {

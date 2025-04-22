@@ -101,6 +101,10 @@ const TypingTest = () => {
       clearInterval(timerIntervalRef.current);
     }
     
+    // Define a reference point for time calculation
+    const timeStarted = new Date();
+    setStartTime(timeStarted);
+    
     timerIntervalRef.current = window.setInterval(() => {
       if (!isTestActive || testComplete) {
         if (timerIntervalRef.current) {
@@ -110,18 +114,17 @@ const TypingTest = () => {
         return;
       }
       
-      if (startTime) {
-        const newElapsedTime = new Date().getTime() - startTime.getTime();
-        setElapsedTime(newElapsedTime);
-        
-        // Update WPM (5 characters = 1 word)
-        const elapsedMinutes = newElapsedTime / 60000;
-        if (elapsedMinutes > 0) {
-          setWpm(Math.floor((correctKeystrokes / 5) / elapsedMinutes));
-        }
+      // Update elapsed time directly from the reference point
+      const newElapsedTime = new Date().getTime() - timeStarted.getTime();
+      setElapsedTime(newElapsedTime);
+      
+      // Update WPM (5 characters = 1 word)
+      const elapsedMinutes = newElapsedTime / 60000;
+      if (elapsedMinutes > 0) {
+        setWpm(Math.floor((correctKeystrokes / 5) / elapsedMinutes));
       }
-    }, 1000);
-  }, [correctKeystrokes, isTestActive, startTime, testComplete]);
+    }, 100); // Update more frequently for smoother time display
+  }, [correctKeystrokes, isTestActive, testComplete]);
 
   // Complete the test
   const completeTest = () => {
@@ -267,6 +270,10 @@ const TypingTest = () => {
     
     // Only scramble keyboard layout after A-Z keys are pressed
     if (isAlphaKey) {
+      // Store current layout before scrambling
+      setPreviousLayouts(prev => [...prev, {...keyboardLayout}]);
+      
+      // Scramble the keyboard
       setKeyboardLayout(scrambleKeyboard(keyboardLayout));
     }
   }, [
@@ -282,8 +289,15 @@ const TypingTest = () => {
     mapPhysicalKeyToVirtual
   ]);
   
+  // Store previous keyboard layouts to enable backspace
+  const [previousLayouts, setPreviousLayouts] = useState<KeyboardLayout[]>([]);
+  const [correctedChars, setCorrectedChars] = useState<boolean[]>([]);
+
   // Handle key down events
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
+    // Don't process if test isn't active
+    if (!isTestActive) return;
+    
     // Track shift key state
     if (event.key === 'Shift') {
       setIsShiftPressed(true);
@@ -295,11 +309,42 @@ const TypingTest = () => {
       setIsShiftPressed(true);
     }
     
-    // Process regular keypress
-    if (isTestActive) {
-      handleKeyPress(event);
+    // Handle backspace
+    if (event.key === 'Backspace') {
+      // Only allow backspace if we're not at the beginning
+      if (currentPosition > 0) {
+        // Move cursor back
+        setCurrentPosition(prev => prev - 1);
+        
+        // Mark this position as corrected if it was initially wrong and is now being fixed
+        const expectedChar = currentText[currentPosition - 1];
+        const typedChar = typedChars[currentPosition - 1];
+        const wasWrong = typedChar !== expectedChar;
+        
+        if (wasWrong) {
+          const newCorrected = [...correctedChars];
+          newCorrected[currentPosition - 1] = true;
+          setCorrectedChars(newCorrected);
+        }
+        
+        // Restore previous keyboard layout if available
+        if (previousLayouts.length > 0) {
+          const prevLayouts = [...previousLayouts];
+          const lastLayout = prevLayouts.pop();
+          if (lastLayout) {
+            setKeyboardLayout(lastLayout);
+            setPreviousLayouts(prevLayouts);
+          }
+        }
+      }
+      
+      // Don't process further
+      return;
     }
-  }, [handleKeyPress, isTestActive]);
+    
+    // Process regular keypress
+    handleKeyPress(event);
+  }, [handleKeyPress, isTestActive, currentPosition, currentText, typedChars, previousLayouts]);
   
   // Handle key up events
   const handleKeyUp = useCallback((event: KeyboardEvent) => {
@@ -357,6 +402,8 @@ const TypingTest = () => {
                     ? 'character-current'
                     : index < currentPosition && typedChars[index] === char
                     ? 'character-correct'
+                    : index < currentPosition && typedChars[index] !== char && correctedChars[index]
+                    ? 'character-corrected'
                     : index < currentPosition && typedChars[index] !== char
                     ? 'character-incorrect'
                     : ''
