@@ -182,56 +182,61 @@ const TypingTest = () => {
   const handleKeyPress = useCallback((event: KeyboardEvent) => {
     if (!isTestActive) return;
     
-    // 獲取當前需要輸入的字符
+    // Get the expected character
     const expectedChar = currentText[currentPosition];
     
-    // 將物理鍵盤按鍵映射到虛擬鍵盤上的字母（只處理字母按鍵）
+    // Get the physical key pressed
     const physicalKey = event.key;
+    
+    // Check if this is an A-Z key (for scrambling purposes)
+    const isAlphaKey = /^[a-zA-Z]$/.test(physicalKey);
+    
+    // Map physical keyboard key to virtual keyboard letter (only for letter keys)
     const mappedKey = mapPhysicalKeyToVirtual(physicalKey, keyboardLayout);
     
-    // 用於輸入比較的按鍵
+    // Key used for input comparison
     const pressedChar = mappedKey;
     
-    // 儲存當前按鍵用於鍵盤高亮（顯示物理按鍵）
+    // Store current key for keyboard highlighting (show physical key)
     setCurrentKey(physicalKey.toUpperCase());
     
-    // 在第一次按鍵時啟動計時器
+    // Start timer on first keystroke
     if (currentPosition === 0 && startTime === null) {
       setStartTime(new Date());
       startTimer();
     }
     
-    // 儲存已輸入的字符
+    // Store typed character
     const newTypedChars = [...typedChars];
     newTypedChars[currentPosition] = pressedChar;
     setTypedChars(newTypedChars);
     
-    // 計數按鍵
+    // Count keystroke
     setKeystrokes(prev => prev + 1);
     
-    // 檢查輸入是否正確
+    // Check if input is correct
     const isCorrect = pressedChar === expectedChar;
     
     if (isCorrect) {
-      // 如果輸入正確，增加正確按鍵計數
+      // If correct, increment correct keystroke count
       setCorrectKeystrokes(prev => prev + 1);
       
-      // 移動到下一個字符
+      // Move to next character
       setCurrentPosition(prev => prev + 1);
       
-      // 檢查打字是否完成
+      // Check if typing is complete
       if (currentPosition + 1 >= currentText.length) {
         completeTest();
         return;
       }
     }
     
-    // 更新準確度
+    // Update accuracy
     const newKeystrokes = keystrokes + 1;
     const newAccuracy = Math.floor((correctKeystrokes + (isCorrect ? 1 : 0)) / newKeystrokes * 100);
     setAccuracy(newAccuracy);
     
-    // 更新 WPM（每5個字符為一個單詞）
+    // Update WPM (5 characters = 1 word)
     if (startTime) {
       const elapsedMinutes = (new Date().getTime() - startTime.getTime()) / 60000;
       if (elapsedMinutes > 0) {
@@ -240,8 +245,10 @@ const TypingTest = () => {
       }
     }
     
-    // 在每次按鍵後打亂鍵盤布局
-    setKeyboardLayout(scrambleKeyboard(keyboardLayout));
+    // Only scramble keyboard layout after A-Z keys are pressed
+    if (isAlphaKey) {
+      setKeyboardLayout(scrambleKeyboard(keyboardLayout));
+    }
   }, [
     correctKeystrokes, 
     currentPosition, 
@@ -271,8 +278,8 @@ const TypingTest = () => {
     <div className="min-h-screen flex flex-col items-center py-8 px-4">
       {/* Header */}
       <header className="w-full max-w-4xl text-center mb-6">
-        <h1 className="text-3xl font-bold text-primary mb-2">混亂打字速度測試</h1>
-        <p className="text-lg text-gray-600">在每次按鍵後鍵盤位置都會重新洗牌！你能保持準確度嗎？</p>
+        <h1 className="text-3xl font-bold text-primary mb-2">Chaotic Typing Speed Test</h1>
+        <p className="text-lg text-gray-600">Type accurately as the keyboard scrambles after each keystroke!</p>
       </header>
 
       {/* Main Content */}
@@ -322,14 +329,14 @@ const TypingTest = () => {
             onClick={startTest}
             disabled={isTestActive}
           >
-            開始測試
+            Start Test
           </button>
           <button 
             className={`px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-md shadow transition ${!isTestActive && !testComplete ? 'opacity-50 cursor-not-allowed' : ''}`}
             onClick={resetTest}
             disabled={!isTestActive && !testComplete}
           >
-            重置
+            Reset
           </button>
         </div>
 
@@ -352,7 +359,7 @@ const TypingTest = () => {
 
       {/* Footer */}
       <footer className="w-full max-w-4xl mt-auto pt-8 text-center text-gray-500 text-sm">
-        <p>混亂打字速度測試 | 挑戰你的打字技能，克服不斷變化的鍵盤佈局！</p>
+        <p>Chaotic Typing Speed Test | Challenge your typing skills with a constantly scrambling keyboard!</p>
       </footer>
     </div>
   );

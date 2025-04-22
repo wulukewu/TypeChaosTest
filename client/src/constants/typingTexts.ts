@@ -1,5 +1,5 @@
 export const typingTexts = [
-  "混亂打字測試是一種新穎的挑戰，它不僅測試您的打字速度，還測試您適應變化的能力。在每次按鍵後，鍵盤布局都會完全重新洗牌，迫使您重新尋找下一個按鍵。您能在這種混亂的條件下保持冷靜嗎？本測試將衡量您的打字速度、準確性以及在不斷變化的環境中的適應能力。",
-  "編程是創建一組指令的過程，這些指令告訴計算機如何執行任務。編程可以使用各種計算機編程語言來完成，例如JavaScript、Python和C++。作為一種打字測試，本段落將挑戰您在鍵盤布局不斷變化的情況下輸入常見的編程術語。您能在這種情況下保持良好的打字節奏嗎？",
-  "人工智能正在改變我們的生活、工作和溝通方式。機器學習算法現在可以識別模式、翻譯語言，甚至創作藝術。當您輸入這段關於前沿技術的文本時，您需要快速適應不斷變化的鍵盤布局。當一切都在不斷變化時，您能多好地保持您的打字節奏？挑戰自己，看看您能否在混亂中保持高效。"
+  "The quick brown fox jumps over the lazy dog. Typing with a constantly scrambling keyboard is a unique challenge that tests not only your typing speed but also your ability to adapt quickly to changes. Can you maintain your composure as the keys switch positions after every keystroke? This test will measure your typing speed, accuracy, and adaptability under chaotic conditions.",
+  "Programming is the process of creating a set of instructions that tell a computer how to perform a task. Programming can be done using a variety of computer programming languages, such as JavaScript, Python, and C++. As a typing test, this paragraph will challenge you with common programming terms while the keyboard layout changes beneath your fingers.",
+  "Artificial intelligence is transforming how we live, work, and communicate. Machine learning algorithms can now recognize patterns, translate languages, and even create art. As you type this text about cutting-edge technology, you'll need to adapt quickly to the changing keyboard layout. How well can you maintain your typing rhythm when everything is constantly shifting?"
 ];

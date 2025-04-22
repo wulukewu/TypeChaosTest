@@ -6,7 +6,7 @@ interface KeyboardProps {
   currentKey: string;
 }
 
-// 標準 QWERTY 鍵盤佈局，用於顯示實體鍵盤的位置
+// Standard QWERTY keyboard layout for physical key positions
 const standardLayout = {
   row1: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
   row2: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
@@ -14,13 +14,13 @@ const standardLayout = {
 };
 
 const Keyboard: FC<KeyboardProps> = ({ keyboardLayout, currentKey }) => {
-  // 方法用於確定每個按鍵的 CSS 類
+  // Method to determine CSS class for each key
   const getKeyClass = (virtualKey: string, physicalKey: string) => {
-    // 檢查這個按鍵是否是當前按下的按鍵
+    // Check if this key is currently pressed
     const isCurrentKey = physicalKey === currentKey || 
                          (physicalKey === 'Space' && currentKey === ' ');
     
-    let className = 'key w-10 h-10 md:w-12 md:h-12 rounded flex flex-col items-center justify-center text-sm font-mono shadow cursor-default transition-all animate-scramble';
+    let className = 'key w-10 h-10 md:w-12 md:h-12 rounded flex items-center justify-center text-sm font-mono shadow cursor-default transition-all animate-scramble';
     
     if (isCurrentKey) {
       className += ' bg-primary text-white';
@@ -34,8 +34,7 @@ const Keyboard: FC<KeyboardProps> = ({ keyboardLayout, currentKey }) => {
   return (
     <div className="keyboard-container w-full max-w-3xl bg-white rounded-lg shadow-lg p-6 mb-4 transition-all duration-300">
       <div className="mb-4 text-center">
-        <p className="text-sm text-gray-500">按下實體鍵盤上對應的位置，而不是字母本身</p>
-        <p className="text-xs text-gray-400 mt-1">（每個按鍵顯示：實際字母 → 原始位置）</p>
+        <p className="text-sm text-gray-500">Press the key in the same position on your physical keyboard</p>
       </div>
       
       {/* Row 1 (numbers) */}
@@ -59,8 +58,7 @@ const Keyboard: FC<KeyboardProps> = ({ keyboardLayout, currentKey }) => {
               key={`row1-${index}`} 
               className={getKeyClass(virtualKey, physicalKey)}
             >
-              <span className="text-base font-bold">{virtualKey}</span>
-              <span className="text-xs opacity-60">{physicalKey}</span>
+              {virtualKey}
             </div>
           );
         })}
@@ -75,8 +73,7 @@ const Keyboard: FC<KeyboardProps> = ({ keyboardLayout, currentKey }) => {
               key={`row2-${index}`} 
               className={getKeyClass(virtualKey, physicalKey)}
             >
-              <span className="text-base font-bold">{virtualKey}</span>
-              <span className="text-xs opacity-60">{physicalKey}</span>
+              {virtualKey}
             </div>
           );
         })}
@@ -91,8 +88,7 @@ const Keyboard: FC<KeyboardProps> = ({ keyboardLayout, currentKey }) => {
               key={`row3-${index}`} 
               className={getKeyClass(virtualKey, physicalKey)}
             >
-              <span className="text-base font-bold">{virtualKey}</span>
-              <span className="text-xs opacity-60">{physicalKey}</span>
+              {virtualKey}
             </div>
           );
         })}
@@ -112,11 +108,11 @@ const Keyboard: FC<KeyboardProps> = ({ keyboardLayout, currentKey }) => {
       <div className="mt-4 pt-2 border-t border-gray-200 flex flex-wrap justify-center items-center text-xs text-gray-500 gap-4">
         <div className="flex items-center">
           <div className="w-4 h-4 bg-neutral rounded mr-1"></div>
-          <span>一般按鍵</span>
+          <span>Normal key</span>
         </div>
         <div className="flex items-center">
           <div className="w-4 h-4 bg-primary rounded mr-1"></div>
-          <span>當前按下的按鍵</span>
+          <span>Current key</span>
         </div>
       </div>
     </div>
