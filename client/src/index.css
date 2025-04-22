@@ -91,6 +91,20 @@
   .animate-scramble {
     animation: scramble 0.3s ease-in-out;
   }
+
+  /* F and J key markers */
+  .key-f::after,
+  .key-j::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 2px;
+    background-color: currentColor;
+    opacity: 0.5;
+  }
   
   /* Theme colors for keyboard */
   .bg-neutral {

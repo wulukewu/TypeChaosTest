@@ -110,6 +110,12 @@ const TypingTest = () => {
       const newElapsedTime = new Date().getTime() - timeStarted.getTime();
       setElapsedTime(newElapsedTime);
 
+      // Update WPM calculation
+      const elapsedMinutes = newElapsedTime / 60000;
+      if (elapsedMinutes > 0) {
+        setWpm(Math.floor((correctKeystrokes / 5) / elapsedMinutes));
+      }
+
       // Update WPM (5 characters = 1 word)
       const elapsedMinutes = newElapsedTime / 60000;
       if (elapsedMinutes > 0) {
@@ -305,6 +311,12 @@ const TypingTest = () => {
 
     // Find the virtual key we need to type
     const nextExpectedCharUpper = nextExpectedChar.toUpperCase();
+
+    // Special handling for space character
+    if (nextExpectedChar === ' ') {
+      setCurrentKey('SPACE');
+      return;
+    }
 
     // Find which physical key will type this character in current layout
     let foundPhysicalKey = '';
