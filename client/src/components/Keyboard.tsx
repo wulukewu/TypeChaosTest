@@ -14,7 +14,7 @@ const standardLayout = {
   row3: ['Z', 'X', 'C', 'V', 'B', 'N', 'M']
 };
 
-const Keyboard: FC<KeyboardProps> = ({ keyboardLayout, currentKey }) => {
+const Keyboard: FC<KeyboardProps> = ({ keyboardLayout, currentKey, virtualKey }) => {
   // Method to determine CSS class for each key
   const getKeyClass = (virtualKey: string, physicalKey: string) => {
     // Check if this key is currently pressed
