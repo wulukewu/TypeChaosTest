@@ -115,12 +115,6 @@ const TypingTest = () => {
       if (elapsedMinutes > 0) {
         setWpm(Math.floor((correctKeystrokes / 5) / elapsedMinutes));
       }
-
-      // Update WPM (5 characters = 1 word)
-      const elapsedMinutes = newElapsedTime / 60000;
-      if (elapsedMinutes > 0) {
-        setWpm(Math.floor((correctKeystrokes / 5) / elapsedMinutes));
-      }
     }, 100); // Update more frequently for smoother time display
   }, [correctKeystrokes, isTestActive, testComplete]);
 
