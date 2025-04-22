@@ -518,6 +518,7 @@ const TypingTest = () => {
           <Keyboard 
             keyboardLayout={keyboardLayout}
             currentKey={currentKey}
+            virtualKey={nextExpectedChar.toUpperCase()}
           />
         ) : (
           <ResultsCard

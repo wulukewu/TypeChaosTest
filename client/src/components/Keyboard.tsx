@@ -4,6 +4,7 @@ import { KeyboardLayout } from '../types/typing';
 interface KeyboardProps {
   keyboardLayout: KeyboardLayout;
   currentKey: string;
+  virtualKey: string;
 }
 
 // Standard QWERTY keyboard layout for physical key positions
@@ -36,7 +37,7 @@ const Keyboard: FC<KeyboardProps> = ({ keyboardLayout, currentKey }) => {
       <div className="mb-4 text-center">
         <p className="text-sm text-gray-500">Press the key in the same position on your physical keyboard</p>
         {currentKey && (
-          <p className="mt-1 text-md font-medium text-primary">To type "<strong>{currentKey}</strong>", press the <strong>{currentKey}</strong> key on your keyboard</p>
+          <p className="mt-1 text-md font-medium text-primary">To type "<strong>{virtualKey}</strong>", press the <strong>{currentKey}</strong> key on your keyboard</p>
         )}
       </div>
       
