@@ -2,6 +2,10 @@
 
 A modern typing test application built with React and Vite. Test your typing speed and accuracy with a beautiful, responsive interface.
 
+## Live Demo
+
+Try it out: [TypeChaosTest](https://wulukewu.github.io/TypeChaosTest)
+
 ## Features
 
 - Real-time typing speed measurement (WPM)
