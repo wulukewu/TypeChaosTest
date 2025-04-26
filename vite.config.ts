@@ -18,6 +18,7 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, "dist"),
     emptyOutDir: true,
+    sourcemap: true,
   },
   optimizeDeps: {
     esbuildOptions: {
@@ -28,5 +29,9 @@ export default defineConfig({
   },
   define: {
     global: "globalThis",
+  },
+  server: {
+    port: 5173,
+    open: true,
   },
 });
