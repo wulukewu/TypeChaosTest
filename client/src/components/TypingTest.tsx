@@ -24,6 +24,37 @@ const TypingTest = () => {
   const [isShiftPressed, setIsShiftPressed] = useState(false);
   const timerIntervalRef = useRef<number | null>(null);
 
+  // Start the timer for the test
+  const startTimer = useCallback(() => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+    }
+
+    // Define a reference point for time calculation
+    const timeStarted = new Date();
+    setStartTime(timeStarted);
+
+    timerIntervalRef.current = window.setInterval(() => {
+      if (!isTestActive || testComplete) {
+        if (timerIntervalRef.current) {
+          clearInterval(timerIntervalRef.current);
+          timerIntervalRef.current = null;
+        }
+        return;
+      }
+
+      // Update elapsed time directly from the reference point
+      const newElapsedTime = new Date().getTime() - timeStarted.getTime();
+      setElapsedTime(newElapsedTime);
+
+      // Update WPM calculation
+      const elapsedMinutes = newElapsedTime / 60000;
+      if (elapsedMinutes > 0) {
+        setWpm(Math.floor(correctKeystrokes / 5 / elapsedMinutes));
+      }
+    }, 100); // Update more frequently for smoother time display
+  }, [correctKeystrokes, isTestActive, testComplete]);
+
   // Start timer when test becomes active
   useEffect(() => {
     if (isTestActive && !testComplete) {
@@ -93,37 +124,6 @@ const TypingTest = () => {
       setIsTestActive(true);
     }
   }, [isTestActive]);
-
-  // Start the timer for the test
-  const startTimer = useCallback(() => {
-    if (timerIntervalRef.current) {
-      clearInterval(timerIntervalRef.current);
-    }
-
-    // Define a reference point for time calculation
-    const timeStarted = new Date();
-    setStartTime(timeStarted);
-
-    timerIntervalRef.current = window.setInterval(() => {
-      if (!isTestActive || testComplete) {
-        if (timerIntervalRef.current) {
-          clearInterval(timerIntervalRef.current);
-          timerIntervalRef.current = null;
-        }
-        return;
-      }
-
-      // Update elapsed time directly from the reference point
-      const newElapsedTime = new Date().getTime() - timeStarted.getTime();
-      setElapsedTime(newElapsedTime);
-
-      // Update WPM calculation
-      const elapsedMinutes = newElapsedTime / 60000;
-      if (elapsedMinutes > 0) {
-        setWpm(Math.floor(correctKeystrokes / 5 / elapsedMinutes));
-      }
-    }, 100); // Update more frequently for smoother time display
-  }, [correctKeystrokes, isTestActive, testComplete]);
 
   // Complete the test
   const completeTest = () => {
