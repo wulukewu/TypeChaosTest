@@ -1,10 +1,10 @@
-import TypingTest from './components/TypingTest';
+import TypingTest from "./components/TypingTest";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 const App = () => {
   return (
-    <div className="app">
+    <div className="min-h-screen bg-background">
       <TooltipProvider>
         <Toaster />
         <TypingTest />
